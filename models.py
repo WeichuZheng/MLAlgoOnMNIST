@@ -47,3 +47,41 @@ class KNN(AbstractMLModel):
     def score(self, X, y):
         predict = self.predict(X)
         return accuracy_score(predict, y)
+
+
+class SVM(AbstractMLModel):
+    def __init__(self, learning_rate=0.01, lambda_param=0.01, num_iterations=1000):
+        self.learning_rate = learning_rate
+        self.lambda_param = lambda_param
+        self.num_iterations = num_iterations
+        self.weights = None
+        self.bias = None
+
+    def fit(self, x, y):
+        num_samples, num_features = x.shape
+
+        # 初始化模型参数
+        self.weights = np.zeros(num_features)
+        self.bias = 0
+
+        # 梯度下降训练
+        for _ in range(self.num_iterations):
+            # 计算模型输出和间隔
+            output = np.dot(x, self.weights) + self.bias
+            margins = y * output
+
+            # 根据间隔更新参数
+            for i, margin in enumerate(margins):
+                if margin >= 1:
+                    self.weights -= self.learning_rate * (2 * self.lambda_param * self.weights)
+                else:
+                    self.weights -= self.learning_rate * (2 * self.lambda_param * self.weights - np.dot(x[i], y[i]))
+                    self.bias -= self.learning_rate * y[i]
+
+    def predict(self, x):
+        output = np.dot(x, self.weights) + self.bias
+        return np.sign(output)
+
+    def score(self, X, y):
+        predict = self.predict(X)
+        return accuracy_score(predict, y)
